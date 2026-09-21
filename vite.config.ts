@@ -1,58 +1,70 @@
 import { createHash } from 'node:crypto';
-import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { copyFileSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import react from '@vitejs/plugin-react';
 import type { Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import { defineConfig } from 'vitest/config';
 
-const pwaPlugin = VitePWA({
-  registerType: 'prompt',
-  injectRegister: 'auto',
-  includeAssets: ['apple-touch-icon.png', 'favicon.ico'],
-  devOptions: {
-    enabled: false,
-  },
-  manifest: {
-    name: 'Aqua Park Inspection',
-    short_name: 'Aqua Inspect',
-    description: 'Offline-first inspection app for inflatable aqua park equipment.',
-    theme_color: '#0b3d4a',
-    background_color: '#06262e',
-    display: 'standalone',
-    orientation: 'any',
-    start_url: '/',
-    scope: '/',
-    lang: 'en',
-    icons: [
-      {
-        src: 'pwa-192x192.png',
-        sizes: '192x192',
-        type: 'image/png',
-      },
-      {
-        src: 'pwa-512x512.png',
-        sizes: '512x512',
-        type: 'image/png',
-      },
-      {
-        src: 'pwa-512x512.png',
-        sizes: '512x512',
-        type: 'image/png',
-        purpose: 'maskable',
-      },
-    ],
-  },
-  workbox: {
-    // Cache the application shell only. Inspection photos live in IndexedDB
-    // and must not be managed by the service worker.
-    globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
-    navigateFallback: '/index.html',
-    cleanupOutdatedCaches: true,
-    skipWaiting: false,
-    clientsClaim: false,
-  },
-});
+const REPO_PAGES_BASE = '/aqua-park-inspection/';
+
+function withBase(base: string, assetPath: string): string {
+  const prefix = base.endsWith('/') ? base.slice(0, -1) : base;
+  if (assetPath === '/') {
+    return prefix ? `${prefix}/` : '/';
+  }
+
+  const suffix = assetPath.startsWith('/') ? assetPath : `/${assetPath}`;
+  return prefix ? `${prefix}${suffix}` : suffix;
+}
+
+function createPwaPlugin(base: string) {
+  return VitePWA({
+    registerType: 'prompt',
+    injectRegister: 'auto',
+    includeAssets: ['apple-touch-icon.png', 'favicon.ico'],
+    devOptions: {
+      enabled: false,
+    },
+    manifest: {
+      name: 'Aqua Park Inspection',
+      short_name: 'Aqua Inspect',
+      description: 'Offline-first inspection app for inflatable aqua park equipment.',
+      theme_color: '#0b3d4a',
+      background_color: '#06262e',
+      display: 'standalone',
+      orientation: 'any',
+      start_url: base,
+      scope: base,
+      lang: 'en',
+      icons: [
+        {
+          src: 'pwa-192x192.png',
+          sizes: '192x192',
+          type: 'image/png',
+        },
+        {
+          src: 'pwa-512x512.png',
+          sizes: '512x512',
+          type: 'image/png',
+        },
+        {
+          src: 'pwa-512x512.png',
+          sizes: '512x512',
+          type: 'image/png',
+          purpose: 'maskable',
+        },
+      ],
+    },
+    workbox: {
+      globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
+      navigateFallback: withBase(base, 'index.html'),
+      cleanupOutdatedCaches: true,
+      skipWaiting: false,
+      clientsClaim: false,
+    },
+  });
+}
 
 function listDistFiles(root: string, current = root): string[] {
   const entries = readdirSync(current);
@@ -76,7 +88,7 @@ function listDistFiles(root: string, current = root): string[] {
  * workbox-build's globbing is unreliable on this Node 18 toolchain.
  * Rewrite sw.js with an explicit app-shell precache so offline startup works.
  */
-function appShellServiceWorker(): Plugin {
+function appShellServiceWorker(base: string): Plugin {
   return {
     name: 'app-shell-service-worker',
     apply: 'build',
@@ -86,7 +98,7 @@ function appShellServiceWorker(): Plugin {
       handler() {
         const dist = path.resolve('dist');
         const urls = listDistFiles(dist).filter((relative) => {
-          if (relative === 'sw.js' || relative.startsWith('workbox-')) {
+          if (relative === 'sw.js' || relative === '404.html' || relative.startsWith('workbox-')) {
             return false;
           }
 
@@ -98,16 +110,19 @@ function appShellServiceWorker(): Plugin {
           .digest('hex')
           .slice(0, 12);
 
-        const precache = urls.map((url) => `/${url}`);
-        if (!precache.includes('/index.html')) {
-          precache.unshift('/index.html');
+        const precache = urls.map((url) => withBase(base, url));
+        const indexUrl = withBase(base, 'index.html');
+        const rootUrl = withBase(base, '/');
+        if (!precache.includes(indexUrl)) {
+          precache.unshift(indexUrl);
         }
-        if (!precache.includes('/')) {
-          precache.unshift('/');
+        if (!precache.includes(rootUrl)) {
+          precache.unshift(rootUrl);
         }
 
         const source = `const CACHE_NAME = 'aqua-park-shell-${revision}';
 const PRECACHE_URLS = ${JSON.stringify(precache, null, 2)};
+const INDEX_URL = ${JSON.stringify(indexUrl)};
 
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
@@ -150,12 +165,10 @@ self.addEventListener('fetch', (event) => {
       }
 
       return fetch(event.request)
-        .then((response) => {
-          return response;
-        })
+        .then((response) => response)
         .catch(() => {
           if (event.request.mode === 'navigate') {
-            return caches.match('/index.html');
+            return caches.match(INDEX_URL);
           }
 
           return cached;
@@ -166,15 +179,24 @@ self.addEventListener('fetch', (event) => {
 `;
 
         writeFileSync(path.join(dist, 'sw.js'), source);
+        copyFileSync(path.join(dist, 'index.html'), path.join(dist, '404.html'));
       },
     },
   };
 }
 
 const isVitest = Boolean(process.env.VITEST);
+const base = process.env.GITHUB_PAGES === 'true' ? REPO_PAGES_BASE : '/';
 
 export default defineConfig({
-  plugins: [react(), ...(isVitest ? [] : [pwaPlugin, appShellServiceWorker()])],
+  base,
+  plugins: [react(), ...(isVitest ? [] : [createPwaPlugin(base), appShellServiceWorker(base)])],
+  server: {
+    allowedHosts: ['.trycloudflare.com'],
+  },
+  preview: {
+    allowedHosts: ['.trycloudflare.com'],
+  },
   test: {
     environment: 'node',
     setupFiles: ['./src/test/setup.ts'],

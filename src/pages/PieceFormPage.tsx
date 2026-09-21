@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { PhotoSection } from '../components/photos/PhotoSection';
 import { Button } from '../components/ui/Button';
 import { SaveIndicator } from '../components/ui/SaveIndicator';
 import { TextField } from '../components/ui/TextField';
+import { piecePhotoTarget } from '../services/photoService';
 import { useDebouncedAutoSave } from '../hooks/useDebouncedAutoSave';
 import { usePiece } from '../hooks/useInspectionData';
 import {
@@ -112,6 +114,7 @@ function CreatePieceFields() {
       <Button type="submit" variant="primary" block>
         Add piece
       </Button>
+      <p className="muted">You can take photographs after this piece is created.</p>
     </form>
   );
 }
@@ -137,6 +140,7 @@ function EditablePieceFields({
     <div className="stack">
       <SaveIndicator status={status} />
       <PieceFieldInputs value={form} onChange={setForm} />
+      <PhotoSection title="Photos" target={piecePhotoTarget(pieceId)} />
     </div>
   );
 }
