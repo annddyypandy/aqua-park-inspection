@@ -76,6 +76,31 @@ export async function updatePiece(
   });
 }
 
+export async function deletePiece(id: string): Promise<void> {
+  const existing = await db.pieces.get(id);
+  if (!existing) {
+    return;
+  }
+
+  const timestamp = nowIso();
+
+  await db.transaction(
+    'rw',
+    db.pieces,
+    db.anchors,
+    db.dRings,
+    db.photos,
+    db.inspections,
+    async () => {
+      await db.photos.where('pieceId').equals(id).delete();
+      await db.anchors.where('pieceId').equals(id).delete();
+      await db.dRings.where('pieceId').equals(id).delete();
+      await db.pieces.delete(id);
+      await db.inspections.update(existing.inspectionId, { updatedAt: timestamp });
+    },
+  );
+}
+
 export async function getPiece(id: string): Promise<Piece | undefined> {
   return db.pieces.get(id);
 }

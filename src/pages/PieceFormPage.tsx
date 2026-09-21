@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PhotoSection } from '../components/photos/PhotoSection';
 import { Button } from '../components/ui/Button';
+import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { SaveIndicator } from '../components/ui/SaveIndicator';
 import { TextField } from '../components/ui/TextField';
 import { piecePhotoTarget } from '../services/photoService';
@@ -9,6 +10,7 @@ import { useDebouncedAutoSave } from '../hooks/useDebouncedAutoSave';
 import { usePiece } from '../hooks/useInspectionData';
 import {
   createPiece,
+  deletePiece,
   suggestNextPieceNumber,
   updatePiece,
 } from '../services/pieceService';
@@ -33,7 +35,9 @@ export function PieceFormPage({ mode }: { mode: 'create' | 'edit' }) {
   if (mode === 'edit' && existing) {
     return (
       <EditablePieceFields
+        inspectionId={existing.inspectionId}
         pieceId={existing.id}
+        pieceLabel={existing.pieceNumber ? `Piece ${existing.pieceNumber}` : 'this piece'}
         initial={{
           pieceNumber: existing.pieceNumber,
           serialNumber: existing.serialNumber,
@@ -120,13 +124,20 @@ function CreatePieceFields() {
 }
 
 function EditablePieceFields({
+  inspectionId,
   pieceId,
+  pieceLabel,
   initial,
 }: {
+  inspectionId: string;
   pieceId: string;
+  pieceLabel: string;
   initial: PieceFormState;
 }) {
+  const navigate = useNavigate();
   const [form, setForm] = useState<PieceFormState>(initial);
+  const [pendingDelete, setPendingDelete] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const snapshot = JSON.stringify(form);
   const status = useDebouncedAutoSave(
     snapshot,
@@ -136,11 +147,35 @@ function EditablePieceFields({
     { enabled: true },
   );
 
+  async function confirmDelete() {
+    try {
+      await deletePiece(pieceId);
+      navigate(`/inspections/${inspectionId}`, { replace: true });
+    } catch {
+      setError('Could not remove this piece.');
+    }
+  }
+
   return (
     <div className="stack">
       <SaveIndicator status={status} />
       <PieceFieldInputs value={form} onChange={setForm} />
       <PhotoSection title="Photos" target={piecePhotoTarget(pieceId)} />
+      {error ? <p className="save-indicator error">{error}</p> : null}
+      <Button variant="danger" block onClick={() => setPendingDelete(true)}>
+        Remove piece
+      </Button>
+      {pendingDelete ? (
+        <ConfirmDialog
+          title="Remove this piece?"
+          message={`“${pieceLabel}” and its photographs will be permanently removed from this inspection.`}
+          confirmLabel="Remove piece"
+          onCancel={() => setPendingDelete(false)}
+          onConfirm={() => {
+            void confirmDelete();
+          }}
+        />
+      ) : null}
     </div>
   );
 }

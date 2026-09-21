@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { db } from '../db';
 import { createInspection, deleteInspection, updateInspection } from './inspectionService';
-import { createPiece, listPieces, suggestNextPieceNumber, updatePiece } from './pieceService';
+import { createPiece, deletePiece, listPieces, suggestNextPieceNumber, updatePiece } from './pieceService';
+import { piecePhotoTarget, saveProcessedPhoto } from './photoService';
 
 describe('inspection and piece persistence', () => {
   beforeEach(async () => {
@@ -85,5 +86,31 @@ describe('inspection and piece persistence', () => {
 
     await expect(db.inspections.get(inspection.id)).resolves.toBeUndefined();
     await expect(listPieces(inspection.id)).resolves.toEqual([]);
+  });
+
+  it('removes a piece and its photographs without deleting the inspection', async () => {
+    const inspection = await createInspection({
+      name: 'Winter 2026',
+      siteName: 'Blue Lake',
+      inspectionDate: '2026-09-21',
+      inspectorName: 'Alex',
+      notes: '',
+    });
+    const keep = await createPiece(inspection.id, { pieceNumber: '001', serialNumber: '' });
+    const remove = await createPiece(inspection.id, { pieceNumber: '002', serialNumber: '' });
+    await saveProcessedPhoto(
+      piecePhotoTarget(remove.id),
+      new Blob(['photo'], { type: 'image/jpeg' }),
+    );
+
+    await deletePiece(remove.id);
+
+    await expect(listPieces(inspection.id)).resolves.toEqual([
+      expect.objectContaining({ id: keep.id }),
+    ]);
+    await expect(db.photos.where('pieceId').equals(remove.id).count()).resolves.toBe(0);
+    await expect(db.inspections.get(inspection.id)).resolves.toMatchObject({
+      id: inspection.id,
+    });
   });
 });
