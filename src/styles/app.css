@@ -86,7 +86,27 @@
   border: 1px solid var(--color-border);
 }
 
-.btn-block {
+.choice-fieldset {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  margin: 0;
+  padding: var(--space-3);
+  display: grid;
+  gap: var(--space-2);
+}
+
+.choice-fieldset legend {
+  font-weight: 700;
+  padding: 0 0.35rem;
+}
+
+.choice-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.choice-row .btn {
   width: 100%;
 }
 

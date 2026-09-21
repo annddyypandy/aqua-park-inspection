@@ -1,6 +1,6 @@
 export type { Inspection, InspectionDraft } from './inspection';
 export type { Piece, PieceDraft } from './piece';
-export type { Anchor } from './anchor';
+export type { Anchor, AnchorDraft } from './anchor';
 export type { DRing } from './dRing';
 export type { Photo } from './photo';
 export {

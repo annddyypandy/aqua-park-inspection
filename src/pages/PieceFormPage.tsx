@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { AnchorSection } from '../components/anchors/AnchorSection';
 import { PhotoSection } from '../components/photos/PhotoSection';
 import { Button } from '../components/ui/Button';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
@@ -160,6 +161,7 @@ function EditablePieceFields({
     <div className="stack">
       <SaveIndicator status={status} />
       <PieceFieldInputs value={form} onChange={setForm} />
+      <AnchorSection pieceId={pieceId} />
       <PhotoSection title="Photos" target={piecePhotoTarget(pieceId)} />
       {error ? <p className="save-indicator error">{error}</p> : null}
       <Button variant="danger" block onClick={() => setPendingDelete(true)}>
