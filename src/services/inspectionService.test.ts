@@ -63,13 +63,23 @@ describe('inspection and piece persistence', () => {
     });
 
     await updateInspection(inspection.id, { notes: 'Wind picked up' });
-    await updatePiece(piece.id, { serialNumber: 'ABC-9' });
+    await updatePiece(piece.id, {
+      serialNumber: 'ABC-9',
+      holdsAir: 'yes',
+      holdsAirNotes: 'Held overnight',
+      readyStatus: 'yes-if-repaired',
+      readyNotes: 'Patch scuff',
+    });
 
     const storedInspection = await db.inspections.get(inspection.id);
     const storedPiece = await db.pieces.get(piece.id);
 
     expect(storedInspection?.notes).toBe('Wind picked up');
     expect(storedPiece?.serialNumber).toBe('ABC-9');
+    expect(storedPiece?.holdsAir).toBe('yes');
+    expect(storedPiece?.holdsAirNotes).toBe('Held overnight');
+    expect(storedPiece?.readyStatus).toBe('yes-if-repaired');
+    expect(storedPiece?.readyNotes).toBe('Patch scuff');
   });
 
   it('deletes an inspection and its pieces together', async () => {

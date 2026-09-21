@@ -15,3 +15,15 @@ export interface Piece {
 }
 
 export type PieceDraft = Pick<Piece, 'pieceNumber' | 'serialNumber'>;
+
+export type PieceUpdate = Partial<
+  Pick<
+    Piece,
+    | 'pieceNumber'
+    | 'serialNumber'
+    | 'holdsAir'
+    | 'holdsAirNotes'
+    | 'readyStatus'
+    | 'readyNotes'
+  >
+>;

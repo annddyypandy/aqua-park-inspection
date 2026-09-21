@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AnchorSection } from '../components/anchors/AnchorSection';
+import { PieceAssessmentFields } from '../components/piece/PieceAssessmentFields';
 import { PhotoSection } from '../components/photos/PhotoSection';
 import { Button } from '../components/ui/Button';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
@@ -9,6 +10,7 @@ import { TextField } from '../components/ui/TextField';
 import { piecePhotoTarget } from '../services/photoService';
 import { useDebouncedAutoSave } from '../hooks/useDebouncedAutoSave';
 import { usePiece } from '../hooks/useInspectionData';
+import { HoldsAir, ReadyStatus, type HoldsAirValue, type ReadyStatusValue } from '../models';
 import {
   createPiece,
   deletePiece,
@@ -19,6 +21,13 @@ import {
 interface PieceFormState {
   pieceNumber: string;
   serialNumber: string;
+}
+
+interface EditablePieceFormState extends PieceFormState {
+  holdsAir: HoldsAirValue;
+  holdsAirNotes: string;
+  readyStatus: ReadyStatusValue;
+  readyNotes: string;
 }
 
 export function PieceFormPage({ mode }: { mode: 'create' | 'edit' }) {
@@ -42,6 +51,10 @@ export function PieceFormPage({ mode }: { mode: 'create' | 'edit' }) {
         initial={{
           pieceNumber: existing.pieceNumber,
           serialNumber: existing.serialNumber,
+          holdsAir: existing.holdsAir ?? HoldsAir.NotTested,
+          holdsAirNotes: existing.holdsAirNotes ?? '',
+          readyStatus: existing.readyStatus ?? ReadyStatus.NotAssessed,
+          readyNotes: existing.readyNotes ?? '',
         }}
       />
     );
@@ -133,10 +146,10 @@ function EditablePieceFields({
   inspectionId: string;
   pieceId: string;
   pieceLabel: string;
-  initial: PieceFormState;
+  initial: EditablePieceFormState;
 }) {
   const navigate = useNavigate();
-  const [form, setForm] = useState<PieceFormState>(initial);
+  const [form, setForm] = useState<EditablePieceFormState>(initial);
   const [pendingDelete, setPendingDelete] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const snapshot = JSON.stringify(form);
@@ -160,7 +173,16 @@ function EditablePieceFields({
   return (
     <div className="stack">
       <SaveIndicator status={status} />
-      <PieceFieldInputs value={form} onChange={setForm} />
+      <PieceFieldInputs value={form} onChange={(next) => setForm({ ...form, ...next })} />
+      <PieceAssessmentFields
+        value={{
+          holdsAir: form.holdsAir,
+          holdsAirNotes: form.holdsAirNotes,
+          readyStatus: form.readyStatus,
+          readyNotes: form.readyNotes,
+        }}
+        onChange={(assessment) => setForm({ ...form, ...assessment })}
+      />
       <AnchorSection pieceId={pieceId} />
       <PhotoSection title="Photos" target={piecePhotoTarget(pieceId)} />
       {error ? <p className="save-indicator error">{error}</p> : null}

@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { useInspection, usePieces } from '../hooks/useInspectionData';
-import type { Piece } from '../models';
+import { HoldsAir, ReadyStatus, type Piece } from '../models';
 import { deletePiece } from '../services/pieceService';
 import { calculateInspectionProgress, getPieceWorkStatus } from '../services/progress';
 
@@ -82,6 +82,8 @@ export function InspectionOverviewPage() {
             <article className="card" key={piece.id}>
               <h3>{label}</h3>
               <p className="muted">{piece.serialNumber || 'No serial number'}</p>
+              <p className="muted">{pressureSummary(piece.holdsAir)}</p>
+              <p className="muted">{readySummary(piece.readyStatus)}</p>
               <span className={badgeClass}>{statusLabel[status]}</span>
               <Link
                 className="btn btn-primary btn-block"
@@ -110,4 +112,27 @@ export function InspectionOverviewPage() {
       ) : null}
     </section>
   );
+}
+
+function pressureSummary(value: Piece['holdsAir']): string {
+  if (value === HoldsAir.Yes) {
+    return 'Holds pressure: Yes';
+  }
+  if (value === HoldsAir.No) {
+    return 'Holds pressure: No';
+  }
+  return 'Holds pressure: Not tested';
+}
+
+function readySummary(value: Piece['readyStatus']): string {
+  if (value === ReadyStatus.Yes) {
+    return 'Ready next year: Yes';
+  }
+  if (value === ReadyStatus.YesIfRepaired) {
+    return 'Ready next year: Yes if repaired';
+  }
+  if (value === ReadyStatus.No) {
+    return 'Ready next year: No';
+  }
+  return 'Ready next year: Not assessed';
 }

@@ -1,5 +1,5 @@
 import { db } from '../db';
-import { HoldsAir, ReadyStatus, type Piece, type PieceDraft } from '../models';
+import { HoldsAir, ReadyStatus, type Piece, type PieceDraft, type PieceUpdate } from '../models';
 import { nowIso } from '../utils/dates';
 import { createId } from '../utils/id';
 import { nextPieceNumber } from '../utils/pieceNumbers';
@@ -49,10 +49,7 @@ export async function createPiece(
   return piece;
 }
 
-export async function updatePiece(
-  id: string,
-  patch: Partial<PieceDraft>,
-): Promise<void> {
+export async function updatePiece(id: string, patch: PieceUpdate): Promise<void> {
   const existing = await db.pieces.get(id);
   if (!existing) {
     throw new Error('Piece not found.');
@@ -66,6 +63,16 @@ export async function updatePiece(
       : {}),
     ...('serialNumber' in patch && patch.serialNumber !== undefined
       ? { serialNumber: patch.serialNumber.trim() }
+      : {}),
+    ...('holdsAir' in patch && patch.holdsAir !== undefined ? { holdsAir: patch.holdsAir } : {}),
+    ...('holdsAirNotes' in patch && patch.holdsAirNotes !== undefined
+      ? { holdsAirNotes: patch.holdsAirNotes }
+      : {}),
+    ...('readyStatus' in patch && patch.readyStatus !== undefined
+      ? { readyStatus: patch.readyStatus }
+      : {}),
+    ...('readyNotes' in patch && patch.readyNotes !== undefined
+      ? { readyNotes: patch.readyNotes }
       : {}),
     updatedAt: timestamp,
   };
