@@ -7,10 +7,10 @@ import { NotFoundPage } from './pages/NotFoundPage';
 import { PieceFormPage } from './pages/PieceFormPage';
 
 export default function App() {
-  const basename = import.meta.env.BASE_URL.replace(/\/$/, '');
+  const basename = import.meta.env.BASE_URL.replace(/\/$/, '') || '/';
 
   return (
-    <BrowserRouter basename={basename || undefined}>
+    <BrowserRouter basename={basename}>
       <Routes>
         <Route element={<AppShell />}>
           <Route path="/" element={<InspectionListPage />} />
