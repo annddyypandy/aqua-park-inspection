@@ -22,7 +22,7 @@ function createPwaPlugin(base: string) {
   return VitePWA({
     registerType: 'prompt',
     injectRegister: 'auto',
-    includeAssets: ['apple-touch-icon.png', 'favicon.ico'],
+    includeAssets: ['apple-touch-icon.png', 'favicon.ico', 'app-icon.svg'],
     devOptions: {
       enabled: false,
     },
@@ -49,7 +49,7 @@ function createPwaPlugin(base: string) {
           type: 'image/png',
         },
         {
-          src: 'pwa-512x512.png',
+          src: 'pwa-512x512-maskable.png',
           sizes: '512x512',
           type: 'image/png',
           purpose: 'maskable',
