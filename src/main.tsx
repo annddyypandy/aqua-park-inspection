@@ -4,6 +4,7 @@ import App from './App';
 import { requestPersistentStorage } from './services/storageService';
 import './styles/base.css';
 import './styles/app.css';
+import './styles/report.css';
 
 void requestPersistentStorage();
 

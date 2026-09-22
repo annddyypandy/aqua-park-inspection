@@ -18,6 +18,9 @@ function titleForPath(pathname: string): string {
   if (pathname.includes('/pieces/')) {
     return 'Piece';
   }
+  if (pathname.endsWith('/report')) {
+    return 'Owner report';
+  }
   return 'Inspection';
 }
 
@@ -53,6 +56,11 @@ function backTarget(pathname: string): string {
   const editMatch = pathname.match(/^\/inspections\/([^/]+)\/edit$/);
   if (editMatch?.[1]) {
     return `/inspections/${editMatch[1]}`;
+  }
+
+  const reportMatch = pathname.match(/^\/inspections\/([^/]+)\/report$/);
+  if (reportMatch?.[1]) {
+    return `/inspections/${reportMatch[1]}`;
   }
 
   return '/';

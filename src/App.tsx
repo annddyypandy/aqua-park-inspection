@@ -3,6 +3,7 @@ import { AppShell } from './components/layout/AppShell';
 import { InspectionFormPage } from './pages/InspectionFormPage';
 import { InspectionListPage } from './pages/InspectionListPage';
 import { InspectionOverviewPage } from './pages/InspectionOverviewPage';
+import { InspectionReportPage } from './pages/InspectionReportPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { PieceFormPage } from './pages/PieceFormPage';
 
@@ -19,6 +20,7 @@ export default function App() {
             path="/inspections/:inspectionId/edit"
             element={<InspectionFormPage mode="edit" />}
           />
+          <Route path="/inspections/:inspectionId/report" element={<InspectionReportPage />} />
           <Route path="/inspections/:inspectionId" element={<InspectionOverviewPage />} />
           <Route
             path="/inspections/:inspectionId/pieces/new"

@@ -59,6 +59,9 @@ export function InspectionOverviewPage() {
       <Link className="btn btn-primary btn-block" to={`/inspections/${inspection.id}/pieces/new`}>
         Add piece
       </Link>
+      <Link className="btn btn-secondary btn-block" to={`/inspections/${inspection.id}/report`}>
+        Owner report
+      </Link>
 
       {error ? <p className="save-indicator error">{error}</p> : null}
 
