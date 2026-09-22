@@ -1,4 +1,4 @@
-import { HoldsAir, ReadyStatus, type Piece } from '../models';
+import { DRingCondition, HoldsAir, ReadyStatus, type Piece } from '../models';
 
 export interface InspectionProgress {
   total: number;
@@ -13,6 +13,7 @@ export function isPieceNotStarted(piece: Piece): boolean {
     piece.pieceNumber.trim() === '' &&
     piece.serialNumber.trim() === '' &&
     piece.holdsAir === HoldsAir.NotTested &&
+    piece.connectingDRingCondition === DRingCondition.NotAssessed &&
     piece.readyStatus === ReadyStatus.NotAssessed
   );
 }

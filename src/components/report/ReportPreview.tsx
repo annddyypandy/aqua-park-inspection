@@ -230,6 +230,15 @@ function SheetsPreview({
                         : ''}
                     </dd>
                   </div>
+                  <div>
+                    <dt>Connecting D-ring</dt>
+                    <dd>
+                      {conditionLabel(entry.piece.connectingDRingCondition)}
+                      {entry.piece.connectingDRingNotes.trim()
+                        ? ` — ${entry.piece.connectingDRingNotes.trim()}`
+                        : ''}
+                    </dd>
+                  </div>
                   {entry.anchors.length === 0 ? (
                     <div>
                       <dt>Anchors</dt>
@@ -240,8 +249,7 @@ function SheetsPreview({
                       <div key={anchor.id}>
                         <dt>Anchor {anchor.anchorNumber}</dt>
                         <dd>
-                          {weightLabel(anchor.weightKg)} · line {conditionLabel(anchor.lineCondition)} ·
-                          D-ring {conditionLabel(anchor.connectingDRingCondition)}
+                          {weightLabel(anchor.weightKg)} · line {conditionLabel(anchor.lineCondition)}
                         </dd>
                       </div>
                     ))
@@ -273,7 +281,8 @@ function PieceDetailPage({
         <p className={statusClass(outcome)}>{outcomeLabel(outcome)}</p>
       </header>
       <p className="report-muted">
-        {serialLabel(entry.piece)} · Holds pressure: {holdsAirLabel(entry.piece.holdsAir)}
+        {serialLabel(entry.piece)} · Holds pressure: {holdsAirLabel(entry.piece.holdsAir)} ·
+        D-ring: {conditionLabel(entry.piece.connectingDRingCondition)}
       </p>
       <table className="report-table">
         <thead>
@@ -281,25 +290,21 @@ function PieceDetailPage({
             <th>Anchor</th>
             <th>Weight</th>
             <th>Line</th>
-            <th>D-ring</th>
           </tr>
         </thead>
         <tbody>
           {entry.anchors.length === 0 ? (
             <tr>
-              <td colSpan={4}>No anchors recorded</td>
+              <td colSpan={3}>No anchors recorded</td>
             </tr>
           ) : (
             entry.anchors.map((anchor) => {
-              const flagged =
-                conditionLabel(anchor.lineCondition) === 'Damaged' ||
-                conditionLabel(anchor.connectingDRingCondition) === 'Damaged';
+              const flagged = conditionLabel(anchor.lineCondition) === 'Damaged';
               return (
                 <tr className={flagged ? 'flagged' : undefined} key={anchor.id}>
                   <td>{anchor.anchorNumber}</td>
                   <td>{formatWeightKg(anchor.weightKg) ? weightLabel(anchor.weightKg) : '—'}</td>
                   <td>{conditionLabel(anchor.lineCondition)}</td>
-                  <td>{conditionLabel(anchor.connectingDRingCondition)}</td>
                 </tr>
               );
             })

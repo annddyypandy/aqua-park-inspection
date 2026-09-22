@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { useInspection, usePieces } from '../hooks/useInspectionData';
-import { HoldsAir, ReadyStatus, type Piece } from '../models';
+import { DRingCondition, HoldsAir, ReadyStatus, type Piece } from '../models';
 import { deletePiece } from '../services/pieceService';
 import { calculateInspectionProgress, getPieceWorkStatus } from '../services/progress';
 
@@ -86,6 +86,7 @@ export function InspectionOverviewPage() {
               <h3>{label}</h3>
               <p className="muted">{piece.serialNumber || 'No serial number'}</p>
               <p className="muted">{pressureSummary(piece.holdsAir)}</p>
+              <p className="muted">{dRingSummary(piece.connectingDRingCondition)}</p>
               <p className="muted">{readySummary(piece.readyStatus)}</p>
               <span className={badgeClass}>{statusLabel[status]}</span>
               <Link
@@ -125,6 +126,16 @@ function pressureSummary(value: Piece['holdsAir']): string {
     return 'Holds pressure: No';
   }
   return 'Holds pressure: Not tested';
+}
+
+function dRingSummary(value: Piece['connectingDRingCondition']): string {
+  if (value === DRingCondition.Good) {
+    return 'Connecting D-ring: Yes';
+  }
+  if (value === DRingCondition.Damaged) {
+    return 'Connecting D-ring: No';
+  }
+  return 'Connecting D-ring: Not assessed';
 }
 
 function readySummary(value: Piece['readyStatus']): string {

@@ -1,10 +1,6 @@
 import { useState } from 'react';
 import { useDebouncedAutoSave } from '../../hooks/useDebouncedAutoSave';
-import {
-  type Anchor,
-  type DRingConditionValue,
-  type LineConditionValue,
-} from '../../models';
+import { type Anchor, type LineConditionValue } from '../../models';
 import { updateAnchor } from '../../services/anchorService';
 import { formatWeightKg, parseWeightKg } from '../../utils/anchors';
 import { Button } from '../ui/Button';
@@ -21,8 +17,6 @@ interface AnchorFormState {
   weightKg: string;
   lineCondition: LineConditionValue;
   lineNotes: string;
-  connectingDRingCondition: DRingConditionValue;
-  connectingDRingNotes: string;
 }
 
 function toState(anchor: Anchor): AnchorFormState {
@@ -31,8 +25,6 @@ function toState(anchor: Anchor): AnchorFormState {
     weightKg: formatWeightKg(anchor.weightKg),
     lineCondition: anchor.lineCondition,
     lineNotes: anchor.lineNotes,
-    connectingDRingCondition: anchor.connectingDRingCondition,
-    connectingDRingNotes: anchor.connectingDRingNotes,
   };
 }
 
@@ -57,8 +49,6 @@ export function AnchorCard({ anchor, onRequestDelete }: AnchorCardProps) {
         weightKg,
         lineCondition: form.lineCondition,
         lineNotes: form.lineNotes,
-        connectingDRingCondition: form.connectingDRingCondition,
-        connectingDRingNotes: form.connectingDRingNotes,
       });
     },
     { enabled: true },
@@ -99,22 +89,6 @@ export function AnchorCard({ anchor, onRequestDelete }: AnchorCardProps) {
         label="Line notes"
         value={form.lineNotes}
         onChange={(event) => setForm({ ...form, lineNotes: event.target.value })}
-      />
-      <YesNoField
-        legend="Connecting D-ring in good condition?"
-        value={form.connectingDRingCondition}
-        onChange={(connectingDRingCondition) =>
-          setForm({
-            ...form,
-            connectingDRingCondition,
-          })
-        }
-      />
-      <TextAreaField
-        id={`anchor-dring-notes-${anchor.id}`}
-        label="Connecting D-ring notes"
-        value={form.connectingDRingNotes}
-        onChange={(event) => setForm({ ...form, connectingDRingNotes: event.target.value })}
       />
       <Button variant="danger" block onClick={() => onRequestDelete(anchor)}>
         Remove anchor

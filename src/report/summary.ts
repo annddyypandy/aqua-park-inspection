@@ -2,12 +2,12 @@ import { DRingCondition, HoldsAir, LineCondition, ReadyStatus } from '../models'
 import { pieceHeading } from './labels';
 import type { PieceOutcome, ReportPiece, ReportSummary } from './types';
 
-export function hasDamagedAnchor(entry: ReportPiece): boolean {
-  return entry.anchors.some(
-    (anchor) =>
-      anchor.lineCondition === LineCondition.Damaged ||
-      anchor.connectingDRingCondition === DRingCondition.Damaged,
-  );
+export function hasDamagedLine(entry: ReportPiece): boolean {
+  return entry.anchors.some((anchor) => anchor.lineCondition === LineCondition.Damaged);
+}
+
+export function hasDamagedConnectingDRing(entry: ReportPiece): boolean {
+  return entry.piece.connectingDRingCondition === DRingCondition.Damaged;
 }
 
 export function classifyPiece(entry: ReportPiece): PieceOutcome {
@@ -15,7 +15,11 @@ export function classifyPiece(entry: ReportPiece): PieceOutcome {
   if (piece.readyStatus === ReadyStatus.No || piece.holdsAir === HoldsAir.No) {
     return 'unsuitable';
   }
-  if (piece.readyStatus === ReadyStatus.YesIfRepaired || hasDamagedAnchor(entry)) {
+  if (
+    piece.readyStatus === ReadyStatus.YesIfRepaired ||
+    hasDamagedLine(entry) ||
+    hasDamagedConnectingDRing(entry)
+  ) {
     return 'repair';
   }
   if (piece.readyStatus === ReadyStatus.Yes) {
@@ -45,12 +49,10 @@ export function pieceFlags(entry: ReportPiece): string[] {
   if (entry.piece.holdsAir === HoldsAir.No) {
     flags.push('Pressure');
   }
-  if (entry.anchors.some((anchor) => anchor.lineCondition === LineCondition.Damaged)) {
+  if (hasDamagedLine(entry)) {
     flags.push('Line');
   }
-  if (
-    entry.anchors.some((anchor) => anchor.connectingDRingCondition === DRingCondition.Damaged)
-  ) {
+  if (hasDamagedConnectingDRing(entry)) {
     flags.push('D-ring');
   }
   return flags;
@@ -68,19 +70,20 @@ export function findingReasons(entry: ReportPiece): string[] {
     );
   }
 
+  if (hasDamagedConnectingDRing(entry)) {
+    reasons.push(
+      piece.connectingDRingNotes.trim()
+        ? `Connecting D-ring damaged. ${piece.connectingDRingNotes.trim()}`
+        : 'Connecting D-ring damaged.',
+    );
+  }
+
   for (const anchor of entry.anchors) {
     if (anchor.lineCondition === LineCondition.Damaged) {
       reasons.push(
         anchor.lineNotes.trim()
           ? `Anchor ${anchor.anchorNumber} line damaged. ${anchor.lineNotes.trim()}`
           : `Anchor ${anchor.anchorNumber} line damaged.`,
-      );
-    }
-    if (anchor.connectingDRingCondition === DRingCondition.Damaged) {
-      reasons.push(
-        anchor.connectingDRingNotes.trim()
-          ? `Anchor ${anchor.anchorNumber} connecting D-ring damaged. ${anchor.connectingDRingNotes.trim()}`
-          : `Anchor ${anchor.anchorNumber} connecting D-ring damaged.`,
       );
     }
   }

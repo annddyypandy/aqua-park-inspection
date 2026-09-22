@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { HoldsAir, ReadyStatus, type Piece } from '../models';
+import { DRingCondition, HoldsAir, ReadyStatus, type Piece } from '../models';
 import { calculateInspectionProgress, getPieceWorkStatus } from './progress';
 
 function piece(overrides: Partial<Piece>): Piece {
@@ -10,6 +10,8 @@ function piece(overrides: Partial<Piece>): Piece {
     serialNumber: '',
     holdsAir: HoldsAir.NotTested,
     holdsAirNotes: '',
+    connectingDRingCondition: DRingCondition.NotAssessed,
+    connectingDRingNotes: '',
     readyStatus: ReadyStatus.NotAssessed,
     readyNotes: '',
     isComplete: false,

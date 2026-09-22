@@ -1,8 +1,27 @@
 import { db } from '../db';
-import { HoldsAir, ReadyStatus, type Piece, type PieceDraft, type PieceUpdate } from '../models';
+import {
+  DRingCondition,
+  HoldsAir,
+  ReadyStatus,
+  type Piece,
+  type PieceDraft,
+  type PieceUpdate,
+} from '../models';
 import { nowIso } from '../utils/dates';
 import { createId } from '../utils/id';
 import { nextPieceNumber } from '../utils/pieceNumbers';
+
+export function normalizePiece(record: Piece): Piece {
+  return {
+    ...record,
+    holdsAir: record.holdsAir ?? HoldsAir.NotTested,
+    holdsAirNotes: record.holdsAirNotes ?? '',
+    connectingDRingCondition: record.connectingDRingCondition ?? DRingCondition.NotAssessed,
+    connectingDRingNotes: record.connectingDRingNotes ?? '',
+    readyStatus: record.readyStatus ?? ReadyStatus.NotAssessed,
+    readyNotes: record.readyNotes ?? '',
+  };
+}
 
 function defaultPieceFields(
   inspectionId: string,
@@ -16,6 +35,8 @@ function defaultPieceFields(
     serialNumber: draft.serialNumber.trim(),
     holdsAir: HoldsAir.NotTested,
     holdsAirNotes: '',
+    connectingDRingCondition: DRingCondition.NotAssessed,
+    connectingDRingNotes: '',
     readyStatus: ReadyStatus.NotAssessed,
     readyNotes: '',
     isComplete: false,
@@ -56,8 +77,9 @@ export async function updatePiece(id: string, patch: PieceUpdate): Promise<void>
   }
 
   const timestamp = nowIso();
+  const current = normalizePiece(existing);
   const next: Piece = {
-    ...existing,
+    ...current,
     ...('pieceNumber' in patch && patch.pieceNumber !== undefined
       ? { pieceNumber: patch.pieceNumber.trim() }
       : {}),
@@ -67,6 +89,12 @@ export async function updatePiece(id: string, patch: PieceUpdate): Promise<void>
     ...('holdsAir' in patch && patch.holdsAir !== undefined ? { holdsAir: patch.holdsAir } : {}),
     ...('holdsAirNotes' in patch && patch.holdsAirNotes !== undefined
       ? { holdsAirNotes: patch.holdsAirNotes }
+      : {}),
+    ...('connectingDRingCondition' in patch && patch.connectingDRingCondition !== undefined
+      ? { connectingDRingCondition: patch.connectingDRingCondition }
+      : {}),
+    ...('connectingDRingNotes' in patch && patch.connectingDRingNotes !== undefined
+      ? { connectingDRingNotes: patch.connectingDRingNotes }
       : {}),
     ...('readyStatus' in patch && patch.readyStatus !== undefined
       ? { readyStatus: patch.readyStatus }
@@ -109,10 +137,13 @@ export async function deletePiece(id: string): Promise<void> {
 }
 
 export async function getPiece(id: string): Promise<Piece | undefined> {
-  return db.pieces.get(id);
+  const piece = await db.pieces.get(id);
+  return piece ? normalizePiece(piece) : undefined;
 }
 
 export async function listPieces(inspectionId: string): Promise<Piece[]> {
   const pieces = await db.pieces.where('inspectionId').equals(inspectionId).toArray();
-  return pieces.sort((a, b) => a.pieceNumber.localeCompare(b.pieceNumber, undefined, { numeric: true }));
+  return pieces
+    .map(normalizePiece)
+    .sort((a, b) => a.pieceNumber.localeCompare(b.pieceNumber, undefined, { numeric: true }));
 }

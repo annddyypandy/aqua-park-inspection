@@ -1,10 +1,5 @@
 import { db } from '../db';
-import {
-  DRingCondition,
-  LineCondition,
-  type Anchor,
-  type AnchorDraft,
-} from '../models';
+import { LineCondition, type Anchor, type AnchorDraft } from '../models';
 import { nextAnchorNumber } from '../utils/anchors';
 import { nowIso } from '../utils/dates';
 import { createId } from '../utils/id';
@@ -15,8 +10,6 @@ export function normalizeAnchor(record: Anchor): Anchor {
     weightKg: record.weightKg ?? null,
     lineCondition: record.lineCondition ?? LineCondition.NotAssessed,
     lineNotes: record.lineNotes ?? '',
-    connectingDRingCondition: record.connectingDRingCondition ?? DRingCondition.NotAssessed,
-    connectingDRingNotes: record.connectingDRingNotes ?? '',
   };
 }
 
@@ -53,8 +46,6 @@ export async function addAnchor(pieceId: string): Promise<Anchor> {
     weightKg: null,
     lineCondition: LineCondition.NotAssessed,
     lineNotes: '',
-    connectingDRingCondition: DRingCondition.NotAssessed,
-    connectingDRingNotes: '',
     createdAt: timestamp,
     updatedAt: timestamp,
   };
@@ -80,9 +71,6 @@ export async function updateAnchor(id: string, patch: Partial<AnchorDraft>): Pro
     ...patch,
     ...(patch.anchorNumber !== undefined ? { anchorNumber: patch.anchorNumber.trim() } : {}),
     ...(patch.lineNotes !== undefined ? { lineNotes: patch.lineNotes } : {}),
-    ...(patch.connectingDRingNotes !== undefined
-      ? { connectingDRingNotes: patch.connectingDRingNotes }
-      : {}),
     updatedAt: timestamp,
   };
 

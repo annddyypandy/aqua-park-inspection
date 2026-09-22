@@ -1,15 +1,15 @@
-import type { DRingCondition, LineCondition } from '../../models';
-import { Button } from '../ui/Button';
+import type { DRingConditionValue, LineConditionValue } from '../../models';
+import { Button } from './Button';
 
-type Condition = LineCondition | DRingCondition;
+type Condition = LineConditionValue | DRingConditionValue;
 
-interface YesNoFieldProps {
+interface YesNoFieldProps<T extends Condition> {
   legend: string;
-  value: Condition;
-  onChange: (value: Condition) => void;
+  value: T;
+  onChange: (value: T) => void;
 }
 
-export function YesNoField({ legend, value, onChange }: YesNoFieldProps) {
+export function YesNoField<T extends Condition>({ legend, value, onChange }: YesNoFieldProps<T>) {
   return (
     <fieldset className="choice-fieldset">
       <legend>{legend}</legend>
@@ -17,14 +17,14 @@ export function YesNoField({ legend, value, onChange }: YesNoFieldProps) {
         <Button
           variant={value === 'good' ? 'primary' : 'secondary'}
           aria-pressed={value === 'good'}
-          onClick={() => onChange(value === 'good' ? 'not-assessed' : 'good')}
+          onClick={() => onChange((value === 'good' ? 'not-assessed' : 'good') as T)}
         >
           Yes
         </Button>
         <Button
           variant={value === 'damaged' ? 'danger' : 'secondary'}
           aria-pressed={value === 'damaged'}
-          onClick={() => onChange(value === 'damaged' ? 'not-assessed' : 'damaged')}
+          onClick={() => onChange((value === 'damaged' ? 'not-assessed' : 'damaged') as T)}
         >
           No
         </Button>

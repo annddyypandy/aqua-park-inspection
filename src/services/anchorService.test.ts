@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { db } from '../db';
-import { DRingCondition, LineCondition } from '../models';
+import { LineCondition } from '../models';
 import { createInspection } from './inspectionService';
 import { addAnchor, deleteAnchor, listAnchors, updateAnchor } from './anchorService';
 import { createPiece } from './pieceService';
@@ -34,16 +34,14 @@ describe('anchor persistence', () => {
     await updateAnchor(first.id, {
       weightKg: 15.5,
       lineCondition: LineCondition.Good,
-      connectingDRingCondition: DRingCondition.Damaged,
-      connectingDRingNotes: 'Bent',
+      lineNotes: 'Spliced',
     });
 
     const stored = await listAnchors(piece.id);
     expect(stored).toHaveLength(2);
     expect(stored[0]?.weightKg).toBe(15.5);
     expect(stored[0]?.lineCondition).toBe(LineCondition.Good);
-    expect(stored[0]?.connectingDRingCondition).toBe(DRingCondition.Damaged);
-    expect(stored[0]?.connectingDRingNotes).toBe('Bent');
+    expect(stored[0]?.lineNotes).toBe('Spliced');
   });
 
   it('deletes an anchor without deleting the piece', async () => {

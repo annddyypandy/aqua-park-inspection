@@ -1,5 +1,6 @@
 import Dexie, { type Table } from 'dexie';
 import type { Anchor, DRing, Inspection, Photo, Piece } from '../models';
+import { foldConnectingDRingFromAnchors } from '../utils/connectingDRing';
 
 /**
  * Schema version 1 includes tables needed by later milestones so photo and
@@ -22,6 +23,26 @@ export class AquaParkDatabase extends Dexie {
       anchors: 'id, pieceId, anchorNumber',
       dRings: 'id, pieceId, dRingNumber',
       photos: 'id, pieceId, parentType, parentId',
+    });
+
+    this.version(2).upgrade(async (transaction) => {
+      const anchors = (await transaction.table('anchors').toArray()) as Array<{
+        pieceId: string;
+        connectingDRingCondition?: string;
+        connectingDRingNotes?: string;
+      }>;
+
+      await transaction.table('pieces').toCollection().modify((piece: Piece) => {
+        if (piece.connectingDRingCondition) {
+          return;
+        }
+
+        const folded = foldConnectingDRingFromAnchors(
+          anchors.filter((anchor) => anchor.pieceId === piece.id),
+        );
+        piece.connectingDRingCondition = folded.connectingDRingCondition;
+        piece.connectingDRingNotes = folded.connectingDRingNotes;
+      });
     });
   }
 }

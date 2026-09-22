@@ -1,10 +1,19 @@
 import { ChoiceField } from '../ui/ChoiceField';
 import { TextAreaField } from '../ui/TextField';
-import { HoldsAir, ReadyStatus, type HoldsAirValue, type ReadyStatusValue } from '../../models';
+import { YesNoField } from '../ui/YesNoField';
+import {
+  HoldsAir,
+  ReadyStatus,
+  type DRingConditionValue,
+  type HoldsAirValue,
+  type ReadyStatusValue,
+} from '../../models';
 
 export interface PieceAssessmentState {
   holdsAir: HoldsAirValue;
   holdsAirNotes: string;
+  connectingDRingCondition: DRingConditionValue;
+  connectingDRingNotes: string;
   readyStatus: ReadyStatusValue;
   readyNotes: string;
 }
@@ -33,6 +42,21 @@ export function PieceAssessmentFields({
         label="Pressure notes"
         value={value.holdsAirNotes}
         onChange={(event) => onChange({ ...value, holdsAirNotes: event.target.value })}
+      />
+      <YesNoField
+        legend="Connecting D-ring in good condition?"
+        value={value.connectingDRingCondition}
+        onChange={(connectingDRingCondition) =>
+          onChange({ ...value, connectingDRingCondition })
+        }
+      />
+      <TextAreaField
+        id="connecting-dring-notes"
+        label="Connecting D-ring notes"
+        value={value.connectingDRingNotes}
+        onChange={(event) =>
+          onChange({ ...value, connectingDRingNotes: event.target.value })
+        }
       />
       <ChoiceField
         legend="Ready for use next year?"

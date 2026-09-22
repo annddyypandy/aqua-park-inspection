@@ -2,6 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
 import type { Inspection, Piece } from '../models';
 import { calculateInspectionProgress, type InspectionProgress } from '../services/progress';
+import { normalizePiece } from '../services/pieceService';
 
 export interface InspectionListItem {
   inspection: Inspection;
@@ -16,7 +17,9 @@ export function useInspectionList(): InspectionListItem[] | undefined {
     return inspections.map((inspection) => ({
       inspection,
       progress: calculateInspectionProgress(
-        pieces.filter((piece) => piece.inspectionId === inspection.id),
+        pieces
+          .filter((piece) => piece.inspectionId === inspection.id)
+          .map(normalizePiece),
       ),
     }));
   }, []);
@@ -41,9 +44,11 @@ export function usePieces(inspectionId: string | undefined): Piece[] | undefined
     }
 
     const pieces = await db.pieces.where('inspectionId').equals(inspectionId).toArray();
-    return pieces.sort((a, b) =>
-      a.pieceNumber.localeCompare(b.pieceNumber, undefined, { numeric: true }),
-    );
+    return pieces
+      .map(normalizePiece)
+      .sort((a, b) =>
+        a.pieceNumber.localeCompare(b.pieceNumber, undefined, { numeric: true }),
+      );
   }, [inspectionId]);
 }
 
@@ -53,6 +58,7 @@ export function usePiece(pieceId: string | undefined): Piece | null | undefined 
       return null;
     }
 
-    return (await db.pieces.get(pieceId)) ?? null;
+    const piece = await db.pieces.get(pieceId);
+    return piece ? normalizePiece(piece) : null;
   }, [pieceId]);
 }

@@ -36,8 +36,6 @@ describe('owner report', () => {
           weightKg: 15,
           lineCondition: LineCondition.Damaged,
           lineNotes: 'Abrasion',
-          connectingDRingCondition: DRingCondition.Good,
-          connectingDRingNotes: '',
           createdAt: '',
           updatedAt: '',
         },
@@ -76,6 +74,8 @@ describe('owner report', () => {
     });
     await updatePiece(piece.id, {
       holdsAir: HoldsAir.Yes,
+      connectingDRingCondition: DRingCondition.Damaged,
+      connectingDRingNotes: 'Bent',
       readyStatus: ReadyStatus.YesIfRepaired,
       readyNotes: 'Replace line',
     });
@@ -120,6 +120,8 @@ function pieceStub(
     serialNumber: 'SN-1',
     holdsAir: HoldsAir.NotTested,
     holdsAirNotes: '',
+    connectingDRingCondition: DRingCondition.NotAssessed,
+    connectingDRingNotes: '',
     readyStatus: ReadyStatus.NotAssessed,
     readyNotes: '',
     isComplete: false,

@@ -67,6 +67,8 @@ describe('inspection and piece persistence', () => {
       serialNumber: 'ABC-9',
       holdsAir: 'yes',
       holdsAirNotes: 'Held overnight',
+      connectingDRingCondition: 'damaged',
+      connectingDRingNotes: 'Bent',
       readyStatus: 'yes-if-repaired',
       readyNotes: 'Patch scuff',
     });
@@ -78,6 +80,8 @@ describe('inspection and piece persistence', () => {
     expect(storedPiece?.serialNumber).toBe('ABC-9');
     expect(storedPiece?.holdsAir).toBe('yes');
     expect(storedPiece?.holdsAirNotes).toBe('Held overnight');
+    expect(storedPiece?.connectingDRingCondition).toBe('damaged');
+    expect(storedPiece?.connectingDRingNotes).toBe('Bent');
     expect(storedPiece?.readyStatus).toBe('yes-if-repaired');
     expect(storedPiece?.readyNotes).toBe('Patch scuff');
   });

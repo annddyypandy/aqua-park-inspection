@@ -1,4 +1,4 @@
-import type { HoldsAir, ReadyStatus } from './enums';
+import type { DRingCondition, HoldsAir, ReadyStatus } from './enums';
 
 export interface Piece {
   id: string;
@@ -7,6 +7,8 @@ export interface Piece {
   serialNumber: string;
   holdsAir: HoldsAir;
   holdsAirNotes: string;
+  connectingDRingCondition: DRingCondition;
+  connectingDRingNotes: string;
   readyStatus: ReadyStatus;
   readyNotes: string;
   isComplete: boolean;
@@ -23,6 +25,8 @@ export type PieceUpdate = Partial<
     | 'serialNumber'
     | 'holdsAir'
     | 'holdsAirNotes'
+    | 'connectingDRingCondition'
+    | 'connectingDRingNotes'
     | 'readyStatus'
     | 'readyNotes'
   >

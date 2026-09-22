@@ -251,7 +251,7 @@ async function drawPieceDetail(writer: PdfWriter, entry: ReportPiece): Promise<v
     color: outcome === 'ready' ? OK : outcome === 'unassessed' ? MUTED : REPAIR,
   });
   writer.text(
-    `${serialLabel(entry.piece)} · Holds pressure: ${holdsAirLabel(entry.piece.holdsAir)}`,
+    `${serialLabel(entry.piece)} · Holds pressure: ${holdsAirLabel(entry.piece.holdsAir)} · D-ring: ${conditionLabel(entry.piece.connectingDRingCondition)}`,
     { size: 10, color: MUTED },
   );
   if (entry.piece.holdsAirNotes.trim()) {
@@ -298,12 +298,19 @@ async function drawPieceSheet(writer: PdfWriter, entry: ReportPiece): Promise<vo
   if (entry.piece.holdsAirNotes.trim()) {
     writer.text(entry.piece.holdsAirNotes.trim(), { size: 10, color: MUTED });
   }
+  writer.text(
+    `Connecting D-ring  ${conditionLabel(entry.piece.connectingDRingCondition)}`,
+    { size: 11 },
+  );
+  if (entry.piece.connectingDRingNotes.trim()) {
+    writer.text(entry.piece.connectingDRingNotes.trim(), { size: 10, color: MUTED });
+  }
   if (entry.anchors.length === 0) {
     writer.text('Anchors  None recorded', { size: 11 });
   } else {
     for (const anchor of entry.anchors) {
       writer.text(
-        `Anchor ${anchor.anchorNumber}  ${weightLabel(anchor.weightKg)} · line ${conditionLabel(anchor.lineCondition)} · D-ring ${conditionLabel(anchor.connectingDRingCondition)}`,
+        `Anchor ${anchor.anchorNumber}  ${weightLabel(anchor.weightKg)} · line ${conditionLabel(anchor.lineCondition)}`,
         { size: 11 },
       );
     }
@@ -370,8 +377,8 @@ function drawKpis(writer: PdfWriter, summary: InspectionReport['summary']): void
 }
 
 function drawAnchorTable(writer: PdfWriter, entry: ReportPiece): void {
-  const columns = [70, 90, 120, 140];
-  const headers = ['Anchor', 'Weight', 'Line', 'D-ring'];
+  const columns = [90, 120, 180];
+  const headers = ['Anchor', 'Weight', 'Line'];
   const rowHeight = 18;
   writer.ensure(rowHeight * (entry.anchors.length + 1));
   drawTableHeader(writer, columns, headers, rowHeight);
@@ -388,9 +395,7 @@ function drawAnchorTable(writer: PdfWriter, entry: ReportPiece): void {
   }
 
   for (const anchor of entry.anchors) {
-    const flagged =
-      conditionLabel(anchor.lineCondition) === 'Damaged' ||
-      conditionLabel(anchor.connectingDRingCondition) === 'Damaged';
+    const flagged = conditionLabel(anchor.lineCondition) === 'Damaged';
     if (flagged) {
       writer.page.drawRectangle({
         x: MARGIN,
@@ -404,7 +409,6 @@ function drawAnchorTable(writer: PdfWriter, entry: ReportPiece): void {
       anchor.anchorNumber,
       weightLabel(anchor.weightKg),
       conditionLabel(anchor.lineCondition),
-      conditionLabel(anchor.connectingDRingCondition),
     ];
     let x = MARGIN;
     values.forEach((value, index) => {
