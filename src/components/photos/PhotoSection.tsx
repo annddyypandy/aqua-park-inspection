@@ -102,7 +102,11 @@ function PhotoPreviewDialog({ photo, onClose }: { photo: Photo; onClose: () => v
         aria-label="Photograph preview"
         onClick={(event) => event.stopPropagation()}
       >
-        {url ? <img src={url} alt={photo.caption || 'Inspection photograph'} /> : null}
+        {url ? (
+          <img src={url} alt={photo.caption || 'Inspection photograph'} />
+        ) : (
+          <p className="muted">Photograph could not be shown.</p>
+        )}
         {photo.caption ? <p>{photo.caption}</p> : null}
         <button type="button" className="btn btn-primary btn-block" onClick={onClose}>
           Close

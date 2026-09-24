@@ -31,7 +31,9 @@ export function PhotoCard({ photo, onRequestDelete, onOpen }: PhotoCardProps) {
         onClick={() => onOpen(photo)}
         aria-label={caption.trim() ? `View photo: ${caption}` : 'View photograph'}
       >
-        {url ? <img src={url} alt={caption || 'Inspection photograph'} /> : null}
+        {url ? <img src={url} alt={caption || 'Inspection photograph'} /> : (
+          <p className="muted">Photograph could not be shown.</p>
+        )}
       </button>
       <TextField
         id={`caption-${photo.id}`}

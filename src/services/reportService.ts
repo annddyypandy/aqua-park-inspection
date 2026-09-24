@@ -1,8 +1,9 @@
 import { db } from '../db';
-import { normalizeAnchor } from './anchorService';
-import { listPieces } from './pieceService';
 import { summarizePieces } from '../report/summary';
 import type { InspectionReport, ReportPiece } from '../report/types';
+import { normalizeAnchor } from './anchorService';
+import { materializePhotos, type StoredPhoto } from './photoBlob';
+import { listPieces } from './pieceService';
 
 export async function loadInspectionReport(
   inspectionId: string,
@@ -21,6 +22,8 @@ export async function loadInspectionReport(
       ])
     : [[], []];
 
+  const readyPhotos = await materializePhotos(photos as StoredPhoto[]);
+
   const reportPieces: ReportPiece[] = pieces.map((piece) => ({
     piece,
     anchors: anchors
@@ -29,7 +32,7 @@ export async function loadInspectionReport(
       .sort((a, b) =>
         a.anchorNumber.localeCompare(b.anchorNumber, undefined, { numeric: true }),
       ),
-    photos: photos
+    photos: readyPhotos
       .filter((photo) => photo.pieceId === piece.id)
       .sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
   }));

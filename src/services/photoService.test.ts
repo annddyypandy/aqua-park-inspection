@@ -3,6 +3,7 @@ import { db } from '../db';
 import { PhotoCategory, PhotoParentType } from '../models';
 import { createInspection } from './inspectionService';
 import { createPiece } from './pieceService';
+import type { StoredPhoto } from './photoBlob';
 import {
   deletePhoto,
   listPhotosForParent,
@@ -43,7 +44,15 @@ describe('photo persistence', () => {
     expect(stored[0]?.parentType).toBe(PhotoParentType.Piece);
     expect(stored[0]?.parentId).toBe(piece.id);
     expect(stored[0]?.category).toBe(PhotoCategory.General);
+    expect(stored[0]?.blob).toBeInstanceOf(Blob);
     expect(await stored[0]?.blob.text()).toBe('fake-jpeg');
+    expect(stored[0]?.blob.type).toBe('image/jpeg');
+
+    const raw = (await db.photos.get(photo.id)) as StoredPhoto | undefined;
+    expect(raw?.blob instanceof Blob).toBe(false);
+    expect(
+      raw?.blob instanceof ArrayBuffer || ArrayBuffer.isView(raw?.blob),
+    ).toBe(true);
   });
 
   it('updates captions and deletes only after an explicit delete call', async () => {

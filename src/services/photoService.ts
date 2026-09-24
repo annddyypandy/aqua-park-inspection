@@ -9,6 +9,12 @@ import {
 import { nowIso } from '../utils/dates';
 import { createId } from '../utils/id';
 import { processInspectionImage, PROCESSED_IMAGE_TYPE } from './imageProcessing';
+import {
+  materializePhoto,
+  materializePhotos,
+  toStoredBytes,
+  type StoredPhoto,
+} from './photoBlob';
 
 export interface PhotoTarget {
   pieceId: string;
@@ -43,24 +49,25 @@ export async function saveProcessedPhoto(
   mimeType = PROCESSED_IMAGE_TYPE,
   caption = '',
 ): Promise<Photo> {
-  const photo: Photo = {
+  const bytes = await toStoredBytes(blob);
+  const photo: StoredPhoto = {
     id: createId(),
     pieceId: target.pieceId,
     parentType: target.parentType,
     parentId: target.parentId,
     category: target.category,
-    blob,
+    blob: bytes,
     mimeType,
     caption,
     createdAt: nowIso(),
   };
 
   await db.transaction('rw', db.photos, db.pieces, db.inspections, async () => {
-    await db.photos.add(photo);
+    await db.photos.add(photo as Photo);
     await stampPieceActivity(target.pieceId);
   });
 
-  return photo;
+  return materializePhoto(photo);
 }
 
 export async function addPhotosFromFiles(
@@ -91,7 +98,8 @@ export async function listPhotosForParent(
     .filter((photo) => photo.parentType === parentType)
     .toArray();
 
-  return photos.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  const materialized = await materializePhotos(photos as StoredPhoto[]);
+  return materialized.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
 }
 
 export async function updatePhotoCaption(id: string, caption: string): Promise<void> {

@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../db';
 import type { Photo, PhotoParentTypeValue } from '../models';
+import { listPhotosForParent } from '../services/photoService';
 
 export function usePhotosForParent(
   parentType: PhotoParentTypeValue | undefined,
@@ -11,12 +11,6 @@ export function usePhotosForParent(
       return [];
     }
 
-    const photos = await db.photos
-      .where('parentId')
-      .equals(parentId)
-      .filter((photo) => photo.parentType === parentType)
-      .toArray();
-
-    return photos.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+    return listPhotosForParent(parentType, parentId);
   }, [parentType, parentId]);
 }

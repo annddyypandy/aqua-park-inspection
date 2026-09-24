@@ -421,6 +421,9 @@ function usePhotoUrls(photos: Photo[]): Record<string, string> {
     const current = photosRef.current;
     const next: Record<string, string> = {};
     for (const photo of current) {
+      if (photo.blob.size === 0) {
+        continue;
+      }
       next[photo.id] = URL.createObjectURL(photo.blob);
     }
     setUrls(next);

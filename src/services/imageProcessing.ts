@@ -35,10 +35,13 @@ export function computeTargetSize(
 async function blobToBitmap(blob: Blob): Promise<ImageBitmap | HTMLImageElement> {
   if (typeof createImageBitmap === 'function') {
     try {
-      // imageOrientation corrects EXIF rotation from iPhone camera JPEGs.
       return await createImageBitmap(blob, { imageOrientation: 'from-image' });
     } catch {
-      return await createImageBitmap(blob);
+      try {
+        return await createImageBitmap(blob);
+      } catch {
+        return loadHtmlImage(blob);
+      }
     }
   }
 
