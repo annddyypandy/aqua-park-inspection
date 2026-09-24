@@ -31,6 +31,14 @@ export const DRingCondition = {
 
 export type DRingCondition = (typeof DRingCondition)[keyof typeof DRingCondition];
 
+export const ValveCoverMissing = {
+  Yes: 'yes',
+  No: 'no',
+  NotAssessed: 'not-assessed',
+} as const;
+
+export type ValveCoverMissing = (typeof ValveCoverMissing)[keyof typeof ValveCoverMissing];
+
 export const PhotoParentType = {
   Piece: 'piece',
   Anchor: 'anchor',

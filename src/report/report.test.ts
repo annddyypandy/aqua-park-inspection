@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { db } from '../db';
-import { DRingCondition, HoldsAir, LineCondition, ReadyStatus } from '../models';
+import { DRingCondition, HoldsAir, LineCondition, ReadyStatus, ValveCoverMissing } from '../models';
 import { generateInspectionPdf } from '../report/generatePdf';
 import { reportFileName } from '../report/fileName';
 import { classifyPiece, summarizePieces } from '../report/summary';
@@ -57,6 +57,7 @@ describe('owner report', () => {
       repair: 1,
       unsuitable: 1,
       unassessed: 0,
+      missingValveCovers: 0,
     });
   });
 
@@ -76,6 +77,7 @@ describe('owner report', () => {
       holdsAir: HoldsAir.Yes,
       connectingDRingCondition: DRingCondition.Damaged,
       connectingDRingNotes: 'Bent',
+      valveCoverMissing: ValveCoverMissing.Yes,
       readyStatus: ReadyStatus.YesIfRepaired,
       readyNotes: 'Replace line',
     });
@@ -88,6 +90,7 @@ describe('owner report', () => {
 
     const report = await loadInspectionReport(inspection.id);
     expect(report?.summary.repair).toBe(1);
+    expect(report?.summary.missingValveCovers).toBe(1);
     expect(report?.pieces[0]?.anchors).toHaveLength(1);
 
     expect(reportFileName(inspection, ReportLayout.Classic)).toBe(
@@ -122,6 +125,7 @@ function pieceStub(
     holdsAirNotes: '',
     connectingDRingCondition: DRingCondition.NotAssessed,
     connectingDRingNotes: '',
+    valveCoverMissing: ValveCoverMissing.NotAssessed,
     readyStatus: ReadyStatus.NotAssessed,
     readyNotes: '',
     isComplete: false,

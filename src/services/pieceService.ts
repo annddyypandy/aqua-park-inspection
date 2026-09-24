@@ -3,6 +3,7 @@ import {
   DRingCondition,
   HoldsAir,
   ReadyStatus,
+  ValveCoverMissing,
   type Piece,
   type PieceDraft,
   type PieceUpdate,
@@ -18,6 +19,7 @@ export function normalizePiece(record: Piece): Piece {
     holdsAirNotes: record.holdsAirNotes ?? '',
     connectingDRingCondition: record.connectingDRingCondition ?? DRingCondition.NotAssessed,
     connectingDRingNotes: record.connectingDRingNotes ?? '',
+    valveCoverMissing: record.valveCoverMissing ?? ValveCoverMissing.NotAssessed,
     readyStatus: record.readyStatus ?? ReadyStatus.NotAssessed,
     readyNotes: record.readyNotes ?? '',
   };
@@ -37,6 +39,7 @@ function defaultPieceFields(
     holdsAirNotes: '',
     connectingDRingCondition: DRingCondition.NotAssessed,
     connectingDRingNotes: '',
+    valveCoverMissing: ValveCoverMissing.NotAssessed,
     readyStatus: ReadyStatus.NotAssessed,
     readyNotes: '',
     isComplete: false,
@@ -95,6 +98,9 @@ export async function updatePiece(id: string, patch: PieceUpdate): Promise<void>
       : {}),
     ...('connectingDRingNotes' in patch && patch.connectingDRingNotes !== undefined
       ? { connectingDRingNotes: patch.connectingDRingNotes }
+      : {}),
+    ...('valveCoverMissing' in patch && patch.valveCoverMissing !== undefined
+      ? { valveCoverMissing: patch.valveCoverMissing }
       : {}),
     ...('readyStatus' in patch && patch.readyStatus !== undefined
       ? { readyStatus: patch.readyStatus }

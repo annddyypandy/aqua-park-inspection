@@ -95,6 +95,20 @@ export function photoCaption(photo: Photo): string {
   return 'Photograph';
 }
 
+export function missingValveCoverCountLabel(count: number): string {
+  return `Valve covers missing: ${count}`;
+}
+
+export function valveCoverMissingLabel(value: ReportPiece['piece']['valveCoverMissing']): string {
+  if (value === 'yes') {
+    return 'Yes';
+  }
+  if (value === 'no') {
+    return 'No';
+  }
+  return 'Not assessed';
+}
+
 export function layoutTitle(layout: ReportLayout): string {
   if (layout === 'findings') {
     return 'Findings first';

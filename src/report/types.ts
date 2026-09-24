@@ -22,6 +22,7 @@ export interface ReportSummary {
   repair: number;
   unsuitable: number;
   unassessed: number;
+  missingValveCovers: number;
 }
 
 export interface InspectionReport {

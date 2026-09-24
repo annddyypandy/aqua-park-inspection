@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DRingCondition, HoldsAir, ReadyStatus, type Piece } from '../models';
+import { DRingCondition, HoldsAir, ReadyStatus, ValveCoverMissing, type Piece } from '../models';
 import { calculateInspectionProgress, getPieceWorkStatus } from './progress';
 
 function piece(overrides: Partial<Piece>): Piece {
@@ -12,6 +12,7 @@ function piece(overrides: Partial<Piece>): Piece {
     holdsAirNotes: '',
     connectingDRingCondition: DRingCondition.NotAssessed,
     connectingDRingNotes: '',
+    valveCoverMissing: ValveCoverMissing.NotAssessed,
     readyStatus: ReadyStatus.NotAssessed,
     readyNotes: '',
     isComplete: false,

@@ -4,9 +4,11 @@ import { YesNoField } from '../ui/YesNoField';
 import {
   HoldsAir,
   ReadyStatus,
+  ValveCoverMissing,
   type DRingConditionValue,
   type HoldsAirValue,
   type ReadyStatusValue,
+  type ValveCoverMissingValue,
 } from '../../models';
 
 export interface PieceAssessmentState {
@@ -14,6 +16,7 @@ export interface PieceAssessmentState {
   holdsAirNotes: string;
   connectingDRingCondition: DRingConditionValue;
   connectingDRingNotes: string;
+  valveCoverMissing: ValveCoverMissingValue;
   readyStatus: ReadyStatusValue;
   readyNotes: string;
 }
@@ -57,6 +60,16 @@ export function PieceAssessmentFields({
         onChange={(event) =>
           onChange({ ...value, connectingDRingNotes: event.target.value })
         }
+      />
+      <ChoiceField
+        legend="Valve cover missing?"
+        value={value.valveCoverMissing}
+        unsetValue={ValveCoverMissing.NotAssessed}
+        options={[
+          { value: ValveCoverMissing.Yes, label: 'Yes', variant: 'danger' },
+          { value: ValveCoverMissing.No, label: 'No', variant: 'primary' },
+        ]}
+        onChange={(valveCoverMissing) => onChange({ ...value, valveCoverMissing })}
       />
       <ChoiceField
         legend="Ready for use next year?"

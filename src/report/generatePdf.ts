@@ -4,11 +4,13 @@ import { reportFileName } from './fileName';
 import {
   conditionLabel,
   holdsAirLabel,
+  missingValveCoverCountLabel,
   outcomeLabel,
   photoCaption,
   pieceHeading,
   readyLabel,
   serialLabel,
+  valveCoverMissingLabel,
   weightLabel,
 } from './labels';
 import { classifyPiece, findingReasons, pieceFlags } from './summary';
@@ -140,6 +142,8 @@ async function drawClassicLayout(writer: PdfWriter, report: InspectionReport): P
   writer.text('Executive summary', { size: 16, bold: true });
   writer.gap(10);
   drawKpis(writer, summary);
+  writer.gap(10);
+  writer.text(missingValveCoverCountLabel(summary.missingValveCovers), { size: 12, bold: true });
   writer.gap(14);
   writer.text('Needs attention', { size: 13, bold: true });
   writer.gap(6);
@@ -185,6 +189,11 @@ async function drawFindingsLayout(writer: PdfWriter, report: InspectionReport): 
     size: 11,
     color: MUTED,
   });
+  writer.gap(8);
+  writer.text(missingValveCoverCountLabel(report.summary.missingValveCovers), {
+    size: 12,
+    bold: true,
+  });
   writer.gap(12);
 
   const unsuitable = report.pieces.filter((entry) => classifyPiece(entry) === 'unsuitable');
@@ -218,7 +227,7 @@ async function drawFindingsLayout(writer: PdfWriter, report: InspectionReport): 
 }
 
 async function drawSheetsLayout(writer: PdfWriter, report: InspectionReport): Promise<void> {
-  const header = `${report.inspection.siteName || 'Site'} · ${formatDisplayDate(report.inspection.inspectionDate)} · ${report.inspection.inspectorName || 'Inspector not recorded'}`;
+  const header = `${report.inspection.siteName || 'Site'} · ${formatDisplayDate(report.inspection.inspectionDate)} · ${report.inspection.inspectorName || 'Inspector not recorded'} · ${missingValveCoverCountLabel(report.summary.missingValveCovers)}`;
 
   if (report.pieces.length === 0) {
     writer.text(header, { size: 10, color: MUTED });
@@ -251,7 +260,7 @@ async function drawPieceDetail(writer: PdfWriter, entry: ReportPiece): Promise<v
     color: outcome === 'ready' ? OK : outcome === 'unassessed' ? MUTED : REPAIR,
   });
   writer.text(
-    `${serialLabel(entry.piece)} · Holds pressure: ${holdsAirLabel(entry.piece.holdsAir)} · D-ring: ${conditionLabel(entry.piece.connectingDRingCondition)}`,
+    `${serialLabel(entry.piece)} · Holds pressure: ${holdsAirLabel(entry.piece.holdsAir)} · D-ring: ${conditionLabel(entry.piece.connectingDRingCondition)} · Valve cover missing: ${valveCoverMissingLabel(entry.piece.valveCoverMissing)}`,
     { size: 10, color: MUTED },
   );
   if (entry.piece.holdsAirNotes.trim()) {
@@ -305,6 +314,10 @@ async function drawPieceSheet(writer: PdfWriter, entry: ReportPiece): Promise<vo
   if (entry.piece.connectingDRingNotes.trim()) {
     writer.text(entry.piece.connectingDRingNotes.trim(), { size: 10, color: MUTED });
   }
+  writer.text(
+    `Valve cover missing  ${valveCoverMissingLabel(entry.piece.valveCoverMissing)}`,
+    { size: 11 },
+  );
   if (entry.anchors.length === 0) {
     writer.text('Anchors  None recorded', { size: 11 });
   } else {

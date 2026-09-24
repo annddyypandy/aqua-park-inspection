@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { useInspection, usePieces } from '../hooks/useInspectionData';
-import { DRingCondition, HoldsAir, ReadyStatus, type Piece } from '../models';
+import { DRingCondition, HoldsAir, ReadyStatus, ValveCoverMissing, type Piece } from '../models';
 import { deletePiece } from '../services/pieceService';
 import { calculateInspectionProgress, getPieceWorkStatus } from '../services/progress';
 
@@ -87,6 +87,7 @@ export function InspectionOverviewPage() {
               <p className="muted">{piece.serialNumber || 'No serial number'}</p>
               <p className="muted">{pressureSummary(piece.holdsAir)}</p>
               <p className="muted">{dRingSummary(piece.connectingDRingCondition)}</p>
+              <p className="muted">{valveCoverSummary(piece.valveCoverMissing)}</p>
               <p className="muted">{readySummary(piece.readyStatus)}</p>
               <span className={badgeClass}>{statusLabel[status]}</span>
               <Link
@@ -136,6 +137,16 @@ function dRingSummary(value: Piece['connectingDRingCondition']): string {
     return 'Connecting D-ring: No';
   }
   return 'Connecting D-ring: Not assessed';
+}
+
+function valveCoverSummary(value: Piece['valveCoverMissing']): string {
+  if (value === ValveCoverMissing.Yes) {
+    return 'Valve cover missing: Yes';
+  }
+  if (value === ValveCoverMissing.No) {
+    return 'Valve cover missing: No';
+  }
+  return 'Valve cover missing: Not assessed';
 }
 
 function readySummary(value: Piece['readyStatus']): string {

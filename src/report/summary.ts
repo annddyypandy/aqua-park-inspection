@@ -1,4 +1,4 @@
-import { DRingCondition, HoldsAir, LineCondition, ReadyStatus } from '../models';
+import { DRingCondition, HoldsAir, LineCondition, ReadyStatus, ValveCoverMissing } from '../models';
 import { pieceHeading } from './labels';
 import type { PieceOutcome, ReportPiece, ReportSummary } from './types';
 
@@ -10,6 +10,10 @@ export function hasDamagedConnectingDRing(entry: ReportPiece): boolean {
   return entry.piece.connectingDRingCondition === DRingCondition.Damaged;
 }
 
+export function hasMissingValveCover(entry: ReportPiece): boolean {
+  return entry.piece.valveCoverMissing === ValveCoverMissing.Yes;
+}
+
 export function classifyPiece(entry: ReportPiece): PieceOutcome {
   const { piece } = entry;
   if (piece.readyStatus === ReadyStatus.No || piece.holdsAir === HoldsAir.No) {
@@ -18,7 +22,8 @@ export function classifyPiece(entry: ReportPiece): PieceOutcome {
   if (
     piece.readyStatus === ReadyStatus.YesIfRepaired ||
     hasDamagedLine(entry) ||
-    hasDamagedConnectingDRing(entry)
+    hasDamagedConnectingDRing(entry) ||
+    hasMissingValveCover(entry)
   ) {
     return 'repair';
   }
@@ -35,10 +40,14 @@ export function summarizePieces(pieces: ReportPiece[]): ReportSummary {
     repair: 0,
     unsuitable: 0,
     unassessed: 0,
+    missingValveCovers: 0,
   };
 
   for (const entry of pieces) {
     summary[classifyPiece(entry)] += 1;
+    if (hasMissingValveCover(entry)) {
+      summary.missingValveCovers += 1;
+    }
   }
 
   return summary;
@@ -54,6 +63,9 @@ export function pieceFlags(entry: ReportPiece): string[] {
   }
   if (hasDamagedConnectingDRing(entry)) {
     flags.push('D-ring');
+  }
+  if (hasMissingValveCover(entry)) {
+    flags.push('Valve cover');
   }
   return flags;
 }
@@ -76,6 +88,10 @@ export function findingReasons(entry: ReportPiece): string[] {
         ? `Connecting D-ring damaged. ${piece.connectingDRingNotes.trim()}`
         : 'Connecting D-ring damaged.',
     );
+  }
+
+  if (hasMissingValveCover(entry)) {
+    reasons.push('Valve cover missing.');
   }
 
   for (const anchor of entry.anchors) {

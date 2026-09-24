@@ -8,6 +8,7 @@ export {
   ReadyStatus,
   LineCondition,
   DRingCondition,
+  ValveCoverMissing,
   PhotoParentType,
   PhotoCategory,
 } from './enums';
@@ -16,6 +17,7 @@ export type {
   ReadyStatus as ReadyStatusValue,
   LineCondition as LineConditionValue,
   DRingCondition as DRingConditionValue,
+  ValveCoverMissing as ValveCoverMissingValue,
   PhotoParentType as PhotoParentTypeValue,
   PhotoCategory as PhotoCategoryValue,
 } from './enums';

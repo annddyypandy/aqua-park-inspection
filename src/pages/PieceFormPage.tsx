@@ -10,7 +10,7 @@ import { TextField } from '../components/ui/TextField';
 import { piecePhotoTarget } from '../services/photoService';
 import { useDebouncedAutoSave } from '../hooks/useDebouncedAutoSave';
 import { usePiece } from '../hooks/useInspectionData';
-import { DRingCondition, HoldsAir, ReadyStatus, type DRingConditionValue, type HoldsAirValue, type ReadyStatusValue } from '../models';
+import { DRingCondition, HoldsAir, ReadyStatus, ValveCoverMissing, type DRingConditionValue, type HoldsAirValue, type ReadyStatusValue, type ValveCoverMissingValue } from '../models';
 import {
   createPiece,
   deletePiece,
@@ -28,6 +28,7 @@ interface EditablePieceFormState extends PieceFormState {
   holdsAirNotes: string;
   connectingDRingCondition: DRingConditionValue;
   connectingDRingNotes: string;
+  valveCoverMissing: ValveCoverMissingValue;
   readyStatus: ReadyStatusValue;
   readyNotes: string;
 }
@@ -58,6 +59,7 @@ export function PieceFormPage({ mode }: { mode: 'create' | 'edit' }) {
           connectingDRingCondition:
             existing.connectingDRingCondition ?? DRingCondition.NotAssessed,
           connectingDRingNotes: existing.connectingDRingNotes ?? '',
+          valveCoverMissing: existing.valveCoverMissing ?? ValveCoverMissing.NotAssessed,
           readyStatus: existing.readyStatus ?? ReadyStatus.NotAssessed,
           readyNotes: existing.readyNotes ?? '',
         }}
@@ -185,6 +187,7 @@ function EditablePieceFields({
           holdsAirNotes: form.holdsAirNotes,
           connectingDRingCondition: form.connectingDRingCondition,
           connectingDRingNotes: form.connectingDRingNotes,
+          valveCoverMissing: form.valveCoverMissing,
           readyStatus: form.readyStatus,
           readyNotes: form.readyNotes,
         }}

@@ -5,11 +5,13 @@ import { formatWeightKg } from '../../utils/anchors';
 import {
   conditionLabel,
   holdsAirLabel,
+  missingValveCoverCountLabel,
   outcomeLabel,
   photoCaption,
   pieceHeading,
   readyLabel,
   serialLabel,
+  valveCoverMissingLabel,
   weightLabel,
 } from '../../report/labels';
 import { classifyPiece, findingReasons, pieceFlags } from '../../report/summary';
@@ -92,6 +94,9 @@ function ClassicPreview({
             <span>Not ready</span>
           </div>
         </div>
+        <p>
+          <strong>{missingValveCoverCountLabel(summary.missingValveCovers)}</strong>
+        </p>
         <h4>Needs attention</h4>
         {attention.length === 0 ? (
           <p className="report-muted">No repair or withdrawal items were recorded.</p>
@@ -139,6 +144,9 @@ function FindingsPreview({
         <h2>What needs doing</h2>
         <p className="report-muted">
           This page is the working list for the owner. Pieces not listed here are ready as-is.
+        </p>
+        <p>
+          <strong>{missingValveCoverCountLabel(report.summary.missingValveCovers)}</strong>
         </p>
         <h4>Do not use</h4>
         {unsuitable.length === 0 ? (
@@ -195,7 +203,7 @@ function SheetsPreview({
   report: InspectionReport;
   urls: Record<string, string>;
 }) {
-  const header = `${report.inspection.siteName || 'Site'} · ${formatDisplayDate(report.inspection.inspectionDate)} · ${report.inspection.inspectorName || 'Inspector not recorded'}`;
+  const header = `${report.inspection.siteName || 'Site'} · ${formatDisplayDate(report.inspection.inspectionDate)} · ${report.inspection.inspectorName || 'Inspector not recorded'} · ${missingValveCoverCountLabel(report.summary.missingValveCovers)}`;
 
   if (report.pieces.length === 0) {
     return (
@@ -238,6 +246,10 @@ function SheetsPreview({
                         ? ` — ${entry.piece.connectingDRingNotes.trim()}`
                         : ''}
                     </dd>
+                  </div>
+                  <div>
+                    <dt>Valve cover missing</dt>
+                    <dd>{valveCoverMissingLabel(entry.piece.valveCoverMissing)}</dd>
                   </div>
                   {entry.anchors.length === 0 ? (
                     <div>
@@ -282,7 +294,8 @@ function PieceDetailPage({
       </header>
       <p className="report-muted">
         {serialLabel(entry.piece)} · Holds pressure: {holdsAirLabel(entry.piece.holdsAir)} ·
-        D-ring: {conditionLabel(entry.piece.connectingDRingCondition)}
+        D-ring: {conditionLabel(entry.piece.connectingDRingCondition)} · Valve cover missing:{' '}
+        {valveCoverMissingLabel(entry.piece.valveCoverMissing)}
       </p>
       <table className="report-table">
         <thead>
